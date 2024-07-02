@@ -1,0 +1,20 @@
+{
+  "name": "shrinkify",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "URL Shortener web application built with NodeJs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "Mahesh Kumaar Balaji",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "sequelize": "^6.37.3",
+    "tedious": "^18.2.0"
+  }
+}

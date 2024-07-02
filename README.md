@@ -1,2 +1,3 @@
-# shrinkify
-URL Shortener web application built with NodeJs and React
+# Shrinkify
+
+A REST API for exposing URL shortener functions, built with NodeJs. 
