@@ -1,5 +1,5 @@
-import { Database } from "../dal/database";
-import { GetHashFor } from "../utils/utilities";
+import { Database } from "../dal/database.js";
+import { GetHashFor } from "../utils/utilities.js";
 
 /**
  * Class that contains the business logic for all url detail processing.
@@ -21,9 +21,9 @@ class BalUrlDetails
         this.database = new Database(DB_NAME, DB_USER, DB_PWD, DB_HOST, DB_PORT);
     }
 
-    TestDbConnection()
+    async TestDbConnection()
     {
-        let [connected, error] = this.database.TestConnection();
+        let [connected, error] = await this.database.TestConnection();
         if(error)
         {
             console.log(`Error occurred while testing database connection: ${error}`);
@@ -34,14 +34,15 @@ class BalUrlDetails
         }
     }
 
-    GetUrl(urlHash)
+    async GetUrl(urlHash)
     {
-        return this.database.FindUrlByHash(urlHash);
+        let [targetUrl, exists, error] = await this.database.FindUrlByHash(urlHash);
+        return [targetUrl, exists, error];
     }
 
-    DeleteUrl(urlHash)
+    async DeleteUrl(urlHash)
     {
-        let [targetUrl, exists, error] = this.database.FindUrlByHash(urlHash);
+        let [targetUrl, exists, error] = await this.database.FindUrlByHash(urlHash);
         if(error)
         {
             return ["", false, error];
@@ -52,7 +53,7 @@ class BalUrlDetails
         }
         else
         {
-            let [deleteSuccess, error] = this.database.DeleteHash(urlHash);
+            let [deleteSuccess, error] = await this.database.DeleteHash(urlHash);
             if(error)
             {
                 return ["", false, error];
@@ -64,9 +65,9 @@ class BalUrlDetails
         }
     }
 
-    CreateUrl(targetUrl)
+    async CreateUrl(targetUrl)
     {
-        let [ExistingHash, Exists, error] = this.database.FindByTargetUrl(targetUrl);
+        let [ExistingHash, Exists, error] = await this.database.FindByTargetUrl(targetUrl);
         if(error)
         {
             return ["", false, error];
@@ -78,7 +79,7 @@ class BalUrlDetails
         else
         {
             let NewHash = GetHashFor(targetUrl);
-            let [CreateSuccess, err] = this.database.CreateHash(targetUrl, NewHash);
+            let [CreateSuccess, err] = await this.database.CreateHash(targetUrl, NewHash);
             if(err)
             {
                 return ["", false, err];
