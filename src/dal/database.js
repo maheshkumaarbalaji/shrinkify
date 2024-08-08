@@ -51,92 +51,84 @@ class Database
 
     /**
      * Test if the connection to remote database server can be established successfully.
-     * @returns {boolean} - value indicating if connection was established successfully.
+     * @returns {Array} - returns an array of 2 values - first value is a boolean indicating if the connection was established successfully, second value returns the error object in case of error encountered.
      */
     async TestConnection()
     {
         try
         {
             await this.sequelize.authenticate();
-            console.log("Database connectivity has been established successfully.");
-            return true;
+            return [true, null];
         }
         catch(error)
         {
-            console.log("Error occurred while testing database connectivity::", error);
-            return false;
+            return [false, error];
         }
     }
 
     /**
      * Searches for a hash in the database and returns its mapped target url.
      * @param {string} hashValue - hash value to be searched in the database.
-     * @returns {Array} - returns an array of 2 values - first value being the target url mapped to the given hash. 2nd value is a boolean indicating if any records were present in the database.
+     * @returns {Array} - returns an array of 3 values - first value being the target url mapped to the given hash. 2nd value is a boolean indicating if any records were present in the database and the last value being the error object containing details of error occurred.
      */
     async FindUrlByHash(hashValue)
     {
-        let targetUrl = "";
-        let Exists = false;
-
         try
         {
             let result = await this.UrlDetail.findByPk(hashValue);
-            let targetUrl = undefined;
             if(result !== null)
             {
-                targetUrl = result.TargetUrl;
-                Exists = true;
+                return [result.TargetUrl, true, null];
+            }
+            else
+            {
+                return ["", false, null];
             }
         }
         catch(error)
         {
-            targetUrl = "";
-            Exists = false;
-            console.log(`Error occurred while querying SQL table for records matching hash - ${hashValue}: ${error}`);
+            return ["", false, error];
         }
-
-        return [targetUrl, Exists];
     }
 
     /**
      * Searches the database for a record with target url that matches the given value.
      * @param {string} targetUrl - target url to be searched in the database.
-     * @returns {Array} - returns an array of 2 values - first value being the hash value mapped to the given target url and the second value being a boolean indicating the presence of records matching the given criteria in the database.
+     * @returns {Array} - returns an array of 3 values - first value being the hash value mapped to the given target url and the second value being a boolean indicating the presence of records matching the given criteria in the database, last value is the error object and null in case of successful processing.
      */
     async FindByTargetUrl(targetUrl)
     {
         let hashValue = undefined;
-        let urlExists = false;
 
         try
         {
             let result = await this.UrlDetail.findOne({ where: { TargetUrl: targetUrl } });
             if(result !== null)
             {
-                urlExists = true;
                 hashValue = result.HashValue;
+                return [hashValue, true, null];
+            }
+            else
+            {
+                return ["", false, null];
             }
         }
         catch(error)
         {
             urlExists = false;
             hashValue = undefined;
-            console.log(`Error occurred while querying SQL table for records matching target url - ${targetUrl}: ${error}`);
+            return ["", false, error];
         }
-
-        return [hashValue, urlExists];
     }
 
     /**
      * Inserts the given hash and corresponding target URL in the database.
      * @param {string} targetUrl - target URL mapped to the given hash.
      * @param {string} hashValue - hash value of the URL record.
-     * @returns {boolean} - if the record was created successfully in the database.
+     * @returns {Array} - returns an array of 2 values - first value is a boolean indicating if the record was created. Second value is an error object if record was not created in the database.
      */
     async CreateHash(targetUrl, hashValue)
     {
-        let isSuccess = false;
-
         try
         {
             await this.UrlDetail.create({
@@ -144,27 +136,21 @@ class Database
                 TargetUrl: targetUrl
             });
 
-            isSuccess = true;
-            console.log(`New Url Detail for ${hashValue} has been successfully created in SQL table.`);
+            return [true, null];
         }
         catch(error)
         {
-            isSuccess = false;
-            console.log(`Error occurred while inserting records in SQL table: ${error}`);
+            return [false, error];
         }
-
-        return isSuccess;
     }
 
     /**
      * Deletes the record in database that matches the given hash value.
      * @param {string} hashValue - hash value to be deleted from database.
-     * @returns {boolean} - returns if the deletion of record was successful.
+     * @returns {Array} - returns an array of 2 values - 1st value is a boolean indicating if any records were present in the database and the last value being the error object containing details of error occurred.
      */
     async DeleteHash(hashValue)
     {
-        let isSuccess = false;
-
         try
         {
             await this.UrlDetail.destroy({
@@ -172,16 +158,13 @@ class Database
                     HashValue: hashValue,
                 },
             });
-    
-            console.log(`Record in SQL table corresponding to hash - ${hashValue} has been deleted successfully.`);
+
+            return [true, null];
         }
         catch(error)
         {
-            isSuccess = false;
-            console.log(`Error occurred while deleting records from SQL table: ${error}`);
+            return [false, error];
         }
-
-        return isSuccess;
     }
 }
 
